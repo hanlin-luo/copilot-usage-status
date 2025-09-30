@@ -1,5 +1,10 @@
 # Copilot Usage Status（macOS 菜单栏应用）
 
+<div align="center">
+  <img src="CopilotUsageStatus/icon.png" alt="Copilot Usage Status app icon" width="128" />
+  <img src="CopilotUsageStatus/Screenshot.png" alt="Copilot Usage Status panel screenshot" width="420" />
+</div>
+
 Copilot Usage Status 是一个简洁的 macOS 菜单栏应用，用于从本地服务拉取并展示 GitHub Copilot 的「premium_interactions」用量。应用采用 SwiftUI + MVVM 架构，支持自动定时刷新、网络错误提示、以及可视化圆环图表。
 
 — 主要特色 —
