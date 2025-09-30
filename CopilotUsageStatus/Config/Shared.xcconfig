@@ -22,6 +22,7 @@ MACOSX_DEPLOYMENT_TARGET = 14.0
 // ==========================================
 GENERATE_INFOPLIST_FILE = YES
 INFOPLIST_KEY_NSAppTransportSecurity = { NSAllowsArbitraryLoads = NO; NSExceptionDomains = { localhost = { NSExceptionAllowsInsecureHTTPLoads = YES; NSIncludesSubdomains = YES; } ; } ; }
+INFOPLIST_KEY_LSUIElement = YES
 ALWAYS_SEARCH_USER_PATHS = NO
 
 // ==========================================
