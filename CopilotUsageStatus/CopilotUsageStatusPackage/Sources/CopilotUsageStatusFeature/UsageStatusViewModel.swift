@@ -37,19 +37,34 @@ public final class UsageStatusViewModel: ObservableObject {
     private let refreshInterval: TimeInterval
     private var refreshTask: Task<Void, Never>?
 
+    // Copilot API service management
+    private let copilotApiService = CopilotApiService()
+    @Published public private(set) var copilotApiState: CopilotApiService.ServiceState = .idle
+
     public init(service: UsageProviding = UsageService(), refreshInterval: TimeInterval = 60) {
         self.service = service
         self.refreshInterval = refreshInterval
+
+        // Observe copilot API service state changes
+        copilotApiService.$state
+            .receive(on: RunLoop.main)
+            .assign(to: &$copilotApiState)
     }
 
     deinit {
         refreshTask?.cancel()
+        // Cannot call async method in deinit, the service will handle cleanup on its own
     }
 
     public func start() {
         refreshTask?.cancel()
         refreshTask = Task { [weak self] in
             guard let self else { return }
+
+            // Start copilot-api service
+            await self.copilotApiService.startService()
+
+            // Start usage monitoring
             await self.load()
 
             while !Task.isCancelled {
@@ -62,6 +77,7 @@ public final class UsageStatusViewModel: ObservableObject {
     public func stop() {
         refreshTask?.cancel()
         refreshTask = nil
+        copilotApiService.stopService()
     }
 
     public func refreshNow() {
@@ -156,5 +172,39 @@ public final class UsageStatusViewModel: ObservableObject {
 
     public var menuAccessibilityLabel: String {
         state.accessibilityLabel
+    }
+
+    // MARK: - Copilot API Service Management
+
+    /// Restarts the copilot-api service
+    public func restartCopilotApiService() async {
+        copilotApiService.stopService()
+        await copilotApiService.startService()
+    }
+
+    /// Returns a human-readable description of the copilot-api service state
+    public var copilotApiStateDescription: String {
+        switch copilotApiState {
+        case .idle:
+            return "API 服务未启动"
+        case .starting:
+            return "正在启动 API 服务..."
+        case .running:
+            return "API 服务运行中"
+        case .stopping:
+            return "正在停止 API 服务..."
+        case let .stopped(reason):
+            return "API 服务已停止: \(reason)"
+        case let .failed(error):
+            return "API 服务失败: \(error)"
+        }
+    }
+
+    /// Returns whether the copilot-api service is currently running
+    public var isCopilotApiRunning: Bool {
+        if case .running = copilotApiState {
+            return true
+        }
+        return false
     }
 }

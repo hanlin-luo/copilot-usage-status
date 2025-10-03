@@ -16,6 +16,10 @@ public struct ContentView: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             header
+
+            // API Service Status Section
+            apiServiceStatusSection
+
             Divider()
             actions
         }
@@ -62,27 +66,57 @@ public struct ContentView: View {
     }
 
     private var actions: some View {
-        HStack {
-            Button {
-                viewModel.refreshNow()
-            } label: {
-                Label("刷新", systemImage: "arrow.clockwise")
-            }
-            .keyboardShortcut("r")
+        VStack(spacing: 8) {
+            // API Service Controls
+            HStack {
+                if viewModel.isCopilotApiRunning {
+                    Button {
+                        Task {
+                            await viewModel.restartCopilotApiService()
+                        }
+                    } label: {
+                        Label("重启 API", systemImage: "arrow.clockwise.circle")
+                    }
+                } else {
+                    Button {
+                        Task {
+                            await viewModel.restartCopilotApiService()
+                        }
+                    } label: {
+                        Label("启动 API", systemImage: "play.circle")
+                    }
+                }
 
-            Spacer()
+                Spacer()
+            }
+            .buttonStyle(.borderless)
+            .imageScale(.medium)
+
+            Divider()
+
+            // Main Actions
+            HStack {
+                Button {
+                    viewModel.refreshNow()
+                } label: {
+                    Label("刷新", systemImage: "arrow.clockwise")
+                }
+                .keyboardShortcut("r")
+
+                Spacer()
 
 #if canImport(AppKit)
-            Button(role: .destructive) {
-                NSApplication.shared.terminate(nil)
-            } label: {
-                Label("退出", systemImage: "xmark.circle")
-            }
-            .keyboardShortcut("q")
+                Button(role: .destructive) {
+                    NSApplication.shared.terminate(nil)
+                } label: {
+                    Label("退出", systemImage: "xmark.circle")
+                }
+                .keyboardShortcut("q")
 #endif
+            }
+            .buttonStyle(.borderless)
+            .imageScale(.medium)
         }
-        .buttonStyle(.borderless)
-        .imageScale(.medium)
     }
 }
 
@@ -292,6 +326,60 @@ struct ContentView_Previews: PreviewProvider {
 private struct PreviewUsageService: UsageProviding {
     func fetchPremiumInteractions() async throws -> PremiumInteractions {
         PremiumInteractions(used: 12, total: 50)
+    }
+}
+
+// MARK: - API Service Status Section
+
+private extension ContentView {
+    var apiServiceStatusSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("API 服务状态")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+
+                Spacer()
+
+                apiStatusIcon
+            }
+
+            Text(viewModel.copilotApiStateDescription)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("API 服务状态：\(viewModel.copilotApiStateDescription)")
+    }
+
+    @ViewBuilder
+    var apiStatusIcon: some View {
+        switch viewModel.copilotApiState {
+        case .idle:
+            Image(systemName: "pause.circle")
+                .foregroundStyle(.secondary)
+
+        case .starting:
+            ProgressView()
+                .progressViewStyle(.circular)
+                .scaleEffect(0.7)
+
+        case .running:
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green)
+
+        case .stopping:
+            Image(systemName: "stop.circle")
+                .foregroundStyle(.orange)
+
+        case .stopped:
+            Image(systemName: "stop.circle.fill")
+                .foregroundStyle(.secondary)
+
+        case .failed:
+            Image(systemName: "xmark.circle.fill")
+                .foregroundStyle(.red)
+        }
     }
 }
 #endif
