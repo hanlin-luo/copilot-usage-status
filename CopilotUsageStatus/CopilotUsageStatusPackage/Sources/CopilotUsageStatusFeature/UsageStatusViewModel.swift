@@ -43,16 +43,17 @@ public final class UsageStatusViewModel: ObservableObject {
     @Published public private(set) var copilotApiState: CopilotApiService.ServiceState = .idle
 
     // User settings
-    public let userSettings = UserSettings()
+    public let userSettings: UserSettings
     private var settingsObserver: AnyCancellable?
 
-    public init(service: UsageProviding? = nil, refreshInterval: TimeInterval = 60) {
+    public init(service: UsageProviding? = nil, refreshInterval: TimeInterval = 60, userSettings: UserSettings = UserSettings()) {
+        self.userSettings = userSettings
+        
         // If service is not provided, create one based on user settings
         if let service = service {
             self.service = service
         } else {
-            let settings = UserSettings()
-            if let customURL = settings.effectiveBaseURL {
+            if let customURL = userSettings.effectiveBaseURL {
                 self.service = UsageService(baseURL: customURL, fallbackBaseURL: nil)
             } else {
                 self.service = UsageService()
