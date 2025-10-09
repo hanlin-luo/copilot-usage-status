@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import Combine
 
 @MainActor
 public final class UsageStatusViewModel: ObservableObject {
@@ -33,7 +34,7 @@ public final class UsageStatusViewModel: ObservableObject {
     @Published public private(set) var state: State = .idle
     @Published public private(set) var lastUpdated: Date?
 
-    private let service: UsageProviding
+    private var service: UsageProviding
     private let refreshInterval: TimeInterval
     private var refreshTask: Task<Void, Never>?
 
@@ -41,14 +42,46 @@ public final class UsageStatusViewModel: ObservableObject {
     private let copilotApiService = CopilotApiService()
     @Published public private(set) var copilotApiState: CopilotApiService.ServiceState = .idle
 
-    public init(service: UsageProviding = UsageService(), refreshInterval: TimeInterval = 60) {
-        self.service = service
+    // User settings
+    public let userSettings = UserSettings()
+    private var settingsObserver: AnyCancellable?
+
+    public init(service: UsageProviding? = nil, refreshInterval: TimeInterval = 60) {
+        // If service is not provided, create one based on user settings
+        if let service = service {
+            self.service = service
+        } else {
+            let settings = UserSettings()
+            if let customURL = settings.effectiveBaseURL {
+                self.service = UsageService(baseURL: customURL, fallbackBaseURL: nil)
+            } else {
+                self.service = UsageService()
+            }
+        }
         self.refreshInterval = refreshInterval
 
         // Observe copilot API service state changes
         copilotApiService.$state
             .receive(on: RunLoop.main)
             .assign(to: &$copilotApiState)
+        
+        // Observe settings changes
+        settingsObserver = userSettings.$customAPIBaseURL
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.updateService()
+            }
+    }
+    
+    private func updateService() {
+        if let customURL = userSettings.effectiveBaseURL {
+            service = UsageService(baseURL: customURL, fallbackBaseURL: nil)
+        } else {
+            service = UsageService()
+        }
+        // Refresh data with new service
+        refreshNow()
     }
 
     deinit {

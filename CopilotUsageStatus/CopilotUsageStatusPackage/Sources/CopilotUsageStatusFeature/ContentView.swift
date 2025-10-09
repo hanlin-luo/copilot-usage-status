@@ -21,6 +21,11 @@ public struct ContentView: View {
             apiServiceStatusSection
 
             Divider()
+            
+            // Settings Section
+            settingsSection
+
+            Divider()
             actions
         }
         .padding(16)
@@ -314,6 +319,54 @@ private struct UsageLegend: View {
     }
 }
 #endif
+
+// MARK: - Settings Section
+
+private extension ContentView {
+    var settingsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("API 地址设置")
+                .font(.subheadline)
+                .fontWeight(.medium)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                TextField("自定义 API 地址（可选）", text: $viewModel.userSettings.customAPIBaseURL)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.caption)
+                    .accessibilityLabel("自定义 API 地址")
+                
+                Text("留空则使用默认地址 http://localhost:4141")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                
+                if !viewModel.userSettings.customAPIBaseURL.isEmpty {
+                    HStack {
+                        if viewModel.userSettings.effectiveBaseURL != nil {
+                            Label("地址有效", systemImage: "checkmark.circle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.green)
+                        } else {
+                            Label("地址无效", systemImage: "xmark.circle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.red)
+                        }
+                        
+                        Spacer()
+                        
+                        Button {
+                            viewModel.userSettings.resetToDefault()
+                        } label: {
+                            Text("重置")
+                                .font(.caption2)
+                        }
+                        .buttonStyle(.borderless)
+                    }
+                }
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
 
 #if DEBUG
 struct ContentView_Previews: PreviewProvider {
