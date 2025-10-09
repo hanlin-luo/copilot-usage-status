@@ -10,6 +10,7 @@ Copilot Usage Status 是一个简洁的 macOS 菜单栏应用，用于从本地�
 — 主要特色 —
 - 菜单栏展示：在 Menubar 中直接显示已用次数或进度。
 - 实时刷新：默认每 60 秒拉取一次最新用量，支持手动刷新。
+- 自定义 API 地址：可在应用面板中配置自定义 API URL，支持非默认端口或远程服务器。
 - 兼容解析：同时支持响应体顶层字段和 `quota_snapshots.premium_interactions` 嵌套结构。
 - 可视化图表：使用 Swift Charts 绘制甜甜圈图，直观呈现已用/剩余比例。
 - 健壮网络：支持 `http://localhost:4141` 与 `http://127.0.0.1:4141` 自动兜底；完善的错误文案。
@@ -17,6 +18,7 @@ Copilot Usage Status 是一个简洁的 macOS 菜单栏应用，用于从本地�
 
 — 接口约定 —
 - 默认请求地址：`GET http://localhost:4141/usage`
+- 自定义 API 地址：可在应用面板的"API 地址设置"中输入自定义 URL（如 `http://192.168.1.100:8080` 或 `http://custom-server:4141`），留空则使用默认地址。
 - 示例返回（截断显示）：
 ```
 {
@@ -41,9 +43,10 @@ Copilot Usage Status 是一个简洁的 macOS 菜单栏应用，用于从本地�
 - 运行本地服务：确保 `localhost:4141/usage` 可访问（可先用 `curl http://localhost:4141/usage` 验证）。
 
 — 权限与配置 —
-- ATS 例外：`Config/Shared.xcconfig` 已允许 `http://localhost` 明文访问。
+- ATS 例外：`Config/Shared.xcconfig` 已允许 `http://localhost` 明文访问。如使用自定义远程 HTTP 地址，需额外配置 ATS。
 - 沙盒权限：`Config/CopilotUsageStatus.entitlements` 已开启 `com.apple.security.network.client` 出站网络权限。
-- IPv4 兜底：网络层在 `localhost` 失败时自动尝试 `127.0.0.1`。
+- IPv4 兜底：网络层在 `localhost` 失败时自动尝试 `127.0.0.1`（仅默认地址）。
+- 自定义 URL：应用会将自定义 URL 保存在 UserDefaults 中，下次启动时自动加载。
 
 — 代码结构 —
 ```
@@ -60,7 +63,8 @@ CopilotUsageStatus/
         ├── ContentView.swift                    # 面板 UI 与图表
         ├── UsageStatusViewModel.swift           # MVVM VM（刷新/状态）
         ├── UsageService.swift                   # 网络：URLSession + 兜底
-        └── UsageModels.swift                    # 兼容解码模型
+        ├── UsageModels.swift                    # 兼容解码模型
+        └── UserSettings.swift                   # 用户设置（自定义 URL）
 ```
 
 — 开发指南 —
@@ -69,6 +73,13 @@ CopilotUsageStatus/
 - 刷新：`UsageStatusViewModel` 默认间隔 60s；调用 `refreshNow()` 可手动刷新。
 - 图表：如可用，使用 Swift Charts 绘制甜甜圈；无 Charts 环境下回退为线性进度条。
 - 无障碍：`accessibilityLabel/value` 覆盖菜单项与图表中心文案。
+
+— 使用自定义 API 地址 —
+1. 点击菜单栏图标打开应用面板。
+2. 在"API 地址设置"部分，输入自定义 API 的完整 URL（如 `http://192.168.1.100:8080` 或 `https://remote-server.com:4141`）。
+3. 应用会自动验证 URL 格式，并显示"地址有效"或"地址无效"的提示。
+4. 保存后，应用会立即使用新地址刷新数据，无需重启。
+5. 点击"重置"按钮可恢复使用默认的 `http://localhost:4141`。
 
 — 常见问题（Troubleshooting） —
 - 显示“无法连接到服务”：
