@@ -23,19 +23,19 @@ public enum UsageServiceError: LocalizedError {
 
 public struct UsageService: UsageProviding {
     public let session: URLSession
-    public let baseURL: URL
-    public let fallbackBaseURL: URL?
+    public let endpoint: URL
+    public let fallbackEndpoint: URL?
 
     public init(session: URLSession = .shared,
-                baseURL: URL = URL(string: "http://localhost:4141")!,
-                fallbackBaseURL: URL? = URL(string: "http://127.0.0.1:4141")) {
+                endpoint: URL = URL(string: "http://localhost:4141/usage")!,
+                fallbackEndpoint: URL? = URL(string: "http://127.0.0.1:4141/usage")) {
         self.session = session
-        self.baseURL = baseURL
-        self.fallbackBaseURL = fallbackBaseURL
+        self.endpoint = endpoint
+        self.fallbackEndpoint = fallbackEndpoint
     }
 
     public func fetchPremiumInteractions() async throws -> PremiumInteractions {
-        let endpoints = [baseURL, fallbackBaseURL].compactMap { $0 }
+        let endpoints = [endpoint, fallbackEndpoint].compactMap { $0 }
 
         var lastError: Error?
 
@@ -57,9 +57,13 @@ public struct UsageService: UsageProviding {
         throw lastError ?? UsageServiceError.missingPremiumInteractions
     }
 
-    private func fetch(from baseURL: URL) async throws -> PremiumInteractions {
-        let requestURL = baseURL.appendingPathComponent("usage")
-        var request = URLRequest(url: requestURL)
+    private func fetch(from endpoint: URL) async throws -> PremiumInteractions {
+        #if DEBUG
+        let ats = Bundle.main.object(forInfoDictionaryKey: "NSAppTransportSecurity") ?? "<nil>"
+        print("[UsageService] ATS config: \(ats)")
+        #endif
+
+        var request = URLRequest(url: endpoint)
         request.httpMethod = "GET"
         request.timeoutInterval = 15
 

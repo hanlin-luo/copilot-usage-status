@@ -20,9 +20,8 @@ MACOSX_DEPLOYMENT_TARGET = 14.0
 // ==========================================
 // Info PLIST
 // ==========================================
-GENERATE_INFOPLIST_FILE = YES
-INFOPLIST_KEY_NSAppTransportSecurity = { NSAllowsArbitraryLoads = NO; NSExceptionDomains = { localhost = { NSExceptionAllowsInsecureHTTPLoads = YES; NSIncludesSubdomains = YES; } ; } ; }
-INFOPLIST_KEY_LSUIElement = YES
+GENERATE_INFOPLIST_FILE = NO
+INFOPLIST_FILE = Config/CopilotUsageStatus-Info.plist
 ALWAYS_SEARCH_USER_PATHS = NO
 
 // ==========================================

@@ -17,10 +17,58 @@ public struct ContentView: View {
         VStack(alignment: .leading, spacing: 16) {
             header
             Divider()
+            endpointConfiguration
+            Divider()
             actions
         }
         .padding(16)
         .frame(minWidth: 240, alignment: .leading)
+        .accessibilityElement(children: .contain)
+    }
+
+    @ViewBuilder
+    private var endpointConfiguration: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label {
+                Text("API 地址")
+                    .font(.subheadline)
+            } icon: {
+                Image(systemName: "link")
+                    .foregroundStyle(.secondary)
+            }
+            .labelStyle(.titleAndIcon)
+            .accessibilityHidden(true)
+
+            TextField("例如：http://localhost:4141/usage", text: $viewModel.endpointDraft)
+                .textFieldStyle(.roundedBorder)
+                .disabled(!viewModel.isEndpointEditable)
+                .onSubmit { viewModel.applyEndpointChanges() }
+                .accessibilityLabel("Copilot API 地址")
+
+            if let error = viewModel.endpointError {
+                Text(error)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
+
+            HStack(spacing: 8) {
+                Button {
+                    viewModel.applyEndpointChanges()
+                } label: {
+                    Label("应用", systemImage: "checkmark.circle")
+                }
+                .disabled(!viewModel.canApplyEndpoint)
+
+                Button {
+                    viewModel.resetEndpointToDefault()
+                } label: {
+                    Label("重置", systemImage: "arrow.uturn.backward")
+                }
+                .disabled(!viewModel.canResetEndpoint)
+            }
+            .buttonStyle(.borderless)
+            .imageScale(.medium)
+        }
         .accessibilityElement(children: .contain)
     }
 

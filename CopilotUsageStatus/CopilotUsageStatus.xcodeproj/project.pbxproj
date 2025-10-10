@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		82A438262E8B749C009ABCAA /* CopilotStatus.icon in Resources */ = {isa = PBXBuildFile; fileRef = 82A438252E8B749C009ABCAA /* CopilotStatus.icon */; };
 		8B90D1482DEDD44A00FBD189 /* CopilotUsageStatusFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 8B90D1472DEDD44A00FBD189 /* CopilotUsageStatusFeature */; };
 /* End PBXBuildFile section */
 
@@ -22,7 +21,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		82A438252E8B749C009ABCAA /* CopilotStatus.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = CopilotStatus.icon; sourceTree = "<group>"; };
 		8BC2655C2DEDD3F400F279A4 /* CopilotUsageStatus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CopilotUsageStatus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BC265742DEDD3F500F279A4 /* CopilotUsageStatus.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CopilotUsageStatus.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -31,6 +29,7 @@
 		8BD71C1E2DEE424400CEDD92 /* Exceptions for "Config" folder in "CopilotUsageStatus" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"CopilotUsageStatus-Info.plist",
 				Debug.xcconfig,
 				Release.xcconfig,
 				Shared.xcconfig,
@@ -95,7 +94,6 @@
 				8BC265772DEDD3F500F279A4 /* CopilotUsageStatusUITests */,
 				8B90D1462DEDD44A00FBD189 /* Frameworks */,
 				8BC2655D2DEDD3F400F279A4 /* Products */,
-				82A438252E8B749C009ABCAA /* CopilotStatus.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -206,7 +204,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				82A438262E8B749C009ABCAA /* CopilotStatus.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
